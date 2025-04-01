@@ -1,8 +1,9 @@
-const { app, BrowserWindow, shell, ipcMain } = require("electron");
+const { app, BrowserWindow, shell, ipcMain, Tray, Menu } = require("electron");
 const path = require("path");
 const fs = require("fs");
 
 let win;
+let tray = null;
 
 const settingsPath = path.join(
   app.getPath("userData"),
@@ -36,6 +37,7 @@ if (!gotTheLock) {
 
   function createWindow() {
     const storedUrl = getStoredURL();
+    const isMac = process.platform === "darwin";
     let baseOrigin = null;
 
     if (storedUrl) {
@@ -51,10 +53,12 @@ if (!gotTheLock) {
       height: 800,
       minWidth: 600,
       minHeight: 600,
-      icon: path.join(__dirname, "assets", "docmost.icns"),
-      frame: false,
-      titleBarStyle: "hidden",
-      trafficLightPosition: { x: 10, y: 13 },
+      icon: path.join(__dirname, "assets", isMac ? "docmost.icns" : "docmost.png"),
+      frame: !isMac,
+      titleBarStyle: isMac ? "hidden" : undefined,
+      ...(isMac && {
+        trafficLightPosition: { x: 10, y: 13 }
+      }),
       webPreferences: {
         preload: path.join(__dirname, "preload.js"),
         contextIsolation: true,
@@ -90,6 +94,39 @@ if (!gotTheLock) {
         win.hide();
       }
     });
+
+    setupTray(isMac);
+  }
+
+  function setupTray(isMac) {
+    if (tray) return; // Don't recreate
+
+    const trayIcon = path.join(__dirname, "assets", isMac ? "docmost.icns" : "docmost.png");
+
+    tray = new Tray(trayIcon);
+    tray.setToolTip("Docmote");
+
+    const contextMenu = Menu.buildFromTemplate([
+      {
+        label: "Show Docmote",
+        click: () => {
+          if (win) win.show();
+        },
+      },
+      {
+        label: "Quit",
+        click: () => {
+          app.isQuitting = true;
+          app.quit();
+        },
+      },
+    ]);
+
+    tray.setContextMenu(contextMenu);
+
+    tray.on("click", () => {
+      if (win) win.show();
+    });
   }
 
   ipcMain.handle("save-instance-url", (event, url) => {
@@ -102,8 +139,9 @@ if (!gotTheLock) {
 
   app.whenReady().then(createWindow);
 
+  // Remove this to avoid quitting on Linux when all windows are closed
   app.on("window-all-closed", () => {
-    if (process.platform !== "darwin") app.quit();
+    // No-op to keep app running in tray
   });
 
   app.on("activate", () => {

@@ -1,14 +1,18 @@
 {
   "name": "docmote",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "main": "main.js",
   "productName": "Docmote",
+  "author": {
+    "name": "Your Name",
+    "email": "your@email.com"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
     "start": "electron .",
-    "dist": "electron-builder"
+    "dist": "electron-builder --linux"
   },
   "dependencies": {
     "react": "^19.0.0",
@@ -22,16 +26,24 @@
   },
   "build": {
     "appId": "com.charles.docmote",
-    "mac": {
-      "icon": "assets/docmost.icns",
-      "target": "dmg"
-    },
     "files": [
       "dist/**/*",
       "main.js",
       "preload.js",
       "assets/docmost.icns",
+      "assets/docmost.png",
       "package.json"
-    ]
+    ],
+    "mac": {
+      "icon": "assets/docmost.icns",
+      "target": "dmg"
+    },
+    "linux": {
+      "icon": "assets/docmost.png",
+      "target": [
+        "AppImage"
+      ],
+      "category": "Utility"
+    }
   }
 }
