@@ -23,6 +23,13 @@ Grab the latest release here:
 
 Supports Apple Silicon (`.dmg`, arm64).
 
+The app is not notarized. If macOS says "Docmote is damaged", run:
+
+```sh
+sudo xattr -rd com.apple.quarantine "/Applications/Docmote.app"
+sudo codesign --force --deep --sign - "/Applications/Docmote.app"
+```
+
 ---
 
 ### 📄 License

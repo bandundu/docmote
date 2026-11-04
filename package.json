@@ -22,9 +22,11 @@
   },
   "build": {
     "appId": "com.charles.docmote",
+    "afterPack": "scripts/adhoc-sign.js",
     "mac": {
       "icon": "assets/docmost.icns",
-      "target": "dmg"
+      "target": "dmg",
+      "identity": null
     },
     "files": [
       "dist/**/*",
